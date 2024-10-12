@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vrund's Bugs</title>
+<style>
+  header {
+    text-align: center;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+
+  .options-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 20px;
+  }
+
+  .description {
+    text-align: center;
+    font-size: 24px; 
+    margin-top: 20px;
+  }
+
+  .options-bar button {
+    margin-left: 10px;
+  }
+
+  .snackbar {
+    visibility: visible;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1;
+    left: 50%;
+    bottom: 70px;
+  }
+
+  @keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 70px; opacity: 1;}
+  }
+
+  @keyframes fadeout {
+    from {bottom: 70px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Vrund's Bugs - CSV Injection</h1>
+  <p class="description">Welcome to Vrund's Bugs! Select the difficulty level:</p>
+</header>
+
+<div class="options-bar">
+  <button onclick="selectDifficulty('Easy')">Easy</button>
+  <button onclick="selectDifficulty('Medium')">Medium</button>
+  <button onclick="selectDifficulty('Hard')">Hard</button>
+</div>
+
+<body>
+
+<h2>The overall objective of these challenges is to open up the calculator using Excel. In order to achieve this you may have top
+  enable DDE in excel which usually is disabled in the newer versions of excel.</h2>
+
+<br>
+
+<h2> To do this follow these Steps:</h2>
+<h2>File → Options → Trust Center → Trust Center Settings → External Content → Enable Dynamic Data Exchange Server Launch</h2>
+<br>
+<h3>Expected output:</h3>
+<img src="Expected_Output.png" alt="Output Image" width="50%" height="50%">
+</body>
+
+<script>
+function selectDifficulty(difficulty) {
+  if(difficulty == "Easy"){
+    window.location.href = "easyBug.html?difficulty=" + difficulty;
+  }
+  else if(difficulty == "Medium"){
+    window.location.href = "mediumBug.html?difficulty=" + difficulty;
+  }
+  else if(difficulty == "Hard"){
+    window.location.href = "hardBug.html?difficulty=" + difficulty;
+  }
+}
+</script>
+
+</body>
+</html>

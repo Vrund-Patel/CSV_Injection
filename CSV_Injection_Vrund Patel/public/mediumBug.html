@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medium Bug - CSV Injection</title>
+<style>
+  header {
+    text-align: center;
+    padding: 20px;
+    background-color: #f0f0f0;
+  }
+
+  .back-button {
+    position: absolute;
+    top: 25px;
+    right: 10px;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .input-field {
+    margin: 20px;
+  }
+
+  .input-field input {
+    margin-right: 10px;
+  }
+
+  .submit-button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .open-excel-button {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .error-message {
+    color: red;
+  }
+
+  table {
+     width: 100%;
+     border-collapse: collapse;
+     margin-top: 20px;
+   }
+ 
+   th, td {
+     border: 1px solid #ddd;
+     padding: 8px;
+     text-align: left;
+   }
+ 
+   th {
+     background-color: #f2f2f2;
+   }
+
+   tr:hover {
+      background-color: #f5f5f5;
+      cursor: pointer;
+    }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Medium Bug - CSV Injection</h1>
+</header>
+
+<button class="back-button" onclick="goBack()">Back</button>
+
+<div class="input-field">
+  <input type="text" id="firstName" placeholder="First Name">
+  <input type="text" id="lastName" placeholder="Last Name">
+  <span class="error-message" id="firstNameError"></span>
+  <span class="error-message" id="lastNameError"></span>
+  <button class="submit-button" onclick="addData()">Add Data</button>
+</div>
+
+<button class="open-excel-button" onclick="openExcel()">Open Excel</button>
+
+<table id="csvTable">
+  <!-- CSV data will be inserted here dynamically -->
+</table>
+
+<script>
+function goBack() {
+  window.location.href = "vrundBugs.html";
+}
+
+function addData() {
+  var firstName = document.getElementById("firstName").value.trim();
+  var lastName = document.getElementById("lastName").value.trim();
+
+  firstName = sanitizeInput(firstName);
+  lastName = sanitizeInput(lastName);
+
+  if (!firstName || !lastName || /[,\r\n;]/.test(firstName) || /[,\r\n;]/.test(lastName)) {
+    alert("First name and last name must not contain commas, semicolons, line breaks, or white spaces (cannot be empty).");
+    return false;
+  }
+
+  var jsonData = {
+    "First Name": firstName,
+    "Last Name": lastName
+  };
+
+  fetch('/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(jsonData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    alert(data.message);
+    document.getElementById("firstName").value = "";
+    document.getElementById("lastName").value = "";
+    document.getElementById("firstNameError").innerText = "";
+    document.getElementById("lastNameError").innerText = "";
+    loadCsvTable(); 
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function sanitizeInput(input) {
+  return input.replace(/[=+‑]/g, '');
+}
+
+function openExcel() {
+  fetch('/openExcel')
+  .then(response => response.json())
+  .then(data => {
+    alert(data.message);
+  })
+  .catch(error => console.error('Error:', error));
+}
+
+function loadCsvTable() {
+  fetch('/data.csv')
+    .then(response => response.text())
+    .then(csvData => {
+      const rows = csvData.split('\n');
+      const table = document.getElementById('csvTable');
+      table.innerHTML = ''; 
+
+      rows.forEach((row, rowIndex) => {
+        const cells = row.split(',');
+        const tr = document.createElement('tr');
+        cells.forEach((cell, cellIndex) => {
+          const trimmedCell = cell.trim(); 
+          if (trimmedCell !== '') { 
+            const td = document.createElement('td');
+            td.textContent = trimmedCell;
+            tr.appendChild(td);
+          }
+        });
+        if (tr.childNodes.length > 0) { 
+          table.appendChild(tr);
+          tr.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f5f5f5';
+          });
+          tr.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+          });
+          tr.addEventListener('click', function() {
+            deleteRow(rowIndex-1); 
+          });
+        }
+      });
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+  
+  function deleteRow(rowIndex) {
+    const jsonData = { rowIndex };
+    fetch('/deleteRow', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(jsonData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert(data.message);
+      loadCsvTable();
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
+loadCsvTable();
+
+</script> 
+
+</body>
+</html>
